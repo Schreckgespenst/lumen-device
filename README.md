@@ -6,7 +6,7 @@ Sibling repo to `Lumen` — the hosted FastAPI build lives there; this repo is t
 
 ## Status
 
-Scaffold only. UI is placeholder pages; the data layer and LLM service are not yet wired.
+Scaffold only. UI is placeholder pages; the data layer and LLM service are not yet wired. Scheduled for Phase 5
 
 ## Stack
 
