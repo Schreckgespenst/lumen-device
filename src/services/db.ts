@@ -24,6 +24,11 @@ async function doInit(): Promise<SQLiteDBConnection> {
     await customElements.whenDefined('jeep-sqlite')
     if (!document.querySelector('jeep-sqlite')) {
       const jeepEl = document.createElement('jeep-sqlite')
+      // Default is `/assets`, but Vite reserves that prefix for bundler
+      // module URLs and serves them via the SPA fallback (returns HTML
+      // instead of the wasm binary). vite.config.ts copies the wasm into
+      // `public/wasm/` to match this attribute.
+      jeepEl.setAttribute('wasm-path', '/wasm')
       document.body.appendChild(jeepEl)
     }
     await sqlite.initWebStore()

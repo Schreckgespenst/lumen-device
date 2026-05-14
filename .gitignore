@@ -33,3 +33,7 @@ dist-ssr
 
 # Claude Code local settings (per-user permissions, not project state)
 .claude/
+
+# Generated at dev/build time by vite.config.ts copySqlWasm() — sourced from
+# node_modules/sql.js, so committing it would duplicate npm-managed content.
+public/wasm/
