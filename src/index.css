@@ -1,0 +1,22 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html, body, #root {
+  height: 100%;
+}
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-feature-settings: 'cv11', 'ss01';
+}
+
+.tnum {
+  font-variant-numeric: tabular-nums;
+}
+
+.markdown h1, .markdown h2, .markdown h3 { font-weight: 600; margin: 0.6rem 0 0.3rem; }
+.markdown p { margin: 0.4rem 0; }
+.markdown ul { margin: 0.3rem 0 0.3rem 1.2rem; list-style: disc; }
+.markdown strong { color: #f5f5fa; }
+.markdown hr { border-color: #2c3140; margin: 0.6rem 0; }
