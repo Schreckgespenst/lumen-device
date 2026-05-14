@@ -1,6 +1,7 @@
 import { useEffect, useState, type ChangeEvent, type FormEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { api } from '../services'
+import { getLlmSettings, setLlmSettings, type LlmBackend } from '../llm'
 
 interface Field {
   name: string
@@ -107,9 +108,11 @@ export default function Setup() {
   }
 
   return (
-    <div className="max-w-xl mx-auto">
-      <h1 className="text-3xl font-semibold mb-1">Set up your profile</h1>
-      <p className="text-subtle mb-6">Lumen uses this to ground every reply from the AI.</p>
+    <div className="max-w-xl mx-auto space-y-6">
+      <div>
+        <h1 className="text-3xl font-semibold mb-1">Set up your profile</h1>
+        <p className="text-subtle">Lumen uses this to ground every reply from the AI.</p>
+      </div>
       <form onSubmit={onSubmit} className="space-y-5 bg-card rounded-2xl p-6 border border-muted">
         {SECTIONS.map((section, i) => (
           <div key={i} className="space-y-4">
@@ -160,6 +163,110 @@ export default function Setup() {
           {saving ? 'Saving…' : 'Save profile'}
         </button>
       </form>
+
+      <LlmSettingsCard />
     </div>
+  )
+}
+
+function LlmSettingsCard() {
+  const [backend, setBackend] = useState<LlmBackend>('groq')
+  const [apiKey, setApiKey] = useState('')
+  const [model, setModel] = useState('')
+  const [revealKey, setRevealKey] = useState(false)
+  const [saving, setSaving] = useState(false)
+  const [status, setStatus] = useState<string | null>(null)
+
+  useEffect(() => {
+    getLlmSettings().then((s) => {
+      setBackend(s.backend)
+      setApiKey(s.groq_api_key)
+      setModel(s.model)
+    }).catch(() => {})
+  }, [])
+
+  const onSave = async (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
+    setSaving(true)
+    setStatus(null)
+    try {
+      await setLlmSettings({ backend, groq_api_key: apiKey.trim(), model: model.trim() })
+      setStatus('Saved.')
+    } catch (err) {
+      setStatus(err instanceof Error ? err.message : String(err))
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  return (
+    <form onSubmit={onSave} className="space-y-4 bg-card rounded-2xl p-6 border border-muted">
+      <div>
+        <h2 className="text-xl font-semibold">LLM settings</h2>
+        <p className="text-subtle text-sm mt-1">
+          Bring your own Groq key — get a free one at{' '}
+          <a href="https://console.groq.com/keys" target="_blank" rel="noreferrer"
+             className="text-accent hover:underline">console.groq.com/keys</a>.
+          Stored locally in Capacitor Preferences. Never uploaded.
+        </p>
+      </div>
+
+      <div className="grid grid-cols-3 items-center gap-3">
+        <label htmlFor="llm_backend" className="text-sm text-subtle">Backend</label>
+        <select
+          id="llm_backend"
+          value={backend}
+          onChange={(e) => setBackend(e.target.value as LlmBackend)}
+          className="col-span-2 bg-muted rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-accent"
+        >
+          <option value="groq">Groq (cloud)</option>
+          <option value="mediapipe">On-device (not implemented)</option>
+        </select>
+      </div>
+
+      <div className="grid grid-cols-3 items-center gap-3">
+        <label htmlFor="groq_api_key" className="text-sm text-subtle">Groq API key</label>
+        <div className="col-span-2 flex gap-2">
+          <input
+            id="groq_api_key"
+            type={revealKey ? 'text' : 'password'}
+            value={apiKey}
+            onChange={(e) => setApiKey(e.target.value)}
+            placeholder="gsk_…"
+            autoComplete="off"
+            className="flex-1 bg-muted rounded-lg px-3 py-2 tnum outline-none focus:ring-2 focus:ring-accent"
+          />
+          <button
+            type="button"
+            onClick={() => setRevealKey((v) => !v)}
+            className="text-xs text-subtle hover:text-text px-2"
+          >
+            {revealKey ? 'hide' : 'show'}
+          </button>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-3 items-center gap-3">
+        <label htmlFor="llm_model" className="text-sm text-subtle">Model</label>
+        <input
+          id="llm_model"
+          type="text"
+          value={model}
+          onChange={(e) => setModel(e.target.value)}
+          placeholder="llama-3.1-8b-instant"
+          className="col-span-2 bg-muted rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-accent"
+        />
+      </div>
+
+      {status && <div className="text-sm text-subtle">{status}</div>}
+
+      <button
+        type="submit"
+        disabled={saving}
+        className="w-full bg-accent hover:bg-purple-500 text-white font-medium py-2 rounded-lg disabled:opacity-50"
+      >
+        {saving ? 'Saving…' : 'Save LLM settings'}
+      </button>
+    </form>
   )
 }
