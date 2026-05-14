@@ -1,55 +1,42 @@
-// Phase 2 stub layer. Every function resolves to empty data so the ported
-// screens render without a backend. Phase 3 will replace these with
-// @capacitor-community/sqlite calls, one module per backend route file.
+// Service facade. UI imports `api` and `todayIso` from here; this file just
+// composes the per-route modules so each table has a dedicated file
+// (matches the backend/routes/ split one-for-one).
 
-import type {
-  ChatMessageOut,
-  ChatOut,
-  FoodIn,
-  FoodOut,
-  MeasurementIn,
-  MeasurementOut,
-  MeasurementPatch,
-  ProfilePatch,
-  ProfileResponse,
-  UserOut,
-  UserSetup,
-  WeightIn,
-  WeightOut,
-  WeightPatch,
-} from '../types'
+import * as profile from './profile'
+import * as food from './food'
+import * as weight from './weight'
+import * as measurements from './measurements'
+import * as chat from './chat'
+
+export { initDb } from './db'
 
 export const api = {
   // profile
-  setup: (_data: UserSetup): Promise<UserOut | null> => Promise.resolve(null),
-  getProfile: (): Promise<ProfileResponse | null> => Promise.resolve(null),
-  patchProfile: (_data: ProfilePatch): Promise<UserOut | null> => Promise.resolve(null),
+  setup: profile.setup,
+  getProfile: profile.getProfile,
+  patchProfile: profile.patchProfile,
 
   // chat
-  sendChat: (_message: string, _image_b64: string | null = null): Promise<ChatOut> =>
-    Promise.resolve({ reply: '', follow_up_options: [], food_entries_added: 0 }),
-  chatHistory: (): Promise<ChatMessageOut[]> => Promise.resolve([]),
-  clearChat: (): Promise<null> => Promise.resolve(null),
+  sendChat: chat.sendChat,
+  chatHistory: chat.chatHistory,
+  clearChat: chat.clearChat,
 
   // food
-  addFood: (_data: FoodIn): Promise<FoodOut | null> => Promise.resolve(null),
-  listFood: (_date?: string): Promise<FoodOut[]> => Promise.resolve([]),
-  deleteFood: (_id: number): Promise<null> => Promise.resolve(null),
+  addFood: food.addFood,
+  listFood: food.listFood,
+  deleteFood: food.deleteFood,
 
   // weight
-  addWeight: (_data: WeightIn): Promise<WeightOut | null> => Promise.resolve(null),
-  listWeight: (): Promise<WeightOut[]> => Promise.resolve([]),
-  patchWeight: (_id: number, _data: WeightPatch): Promise<WeightOut | null> =>
-    Promise.resolve(null),
-  deleteWeight: (_id: number): Promise<null> => Promise.resolve(null),
+  addWeight: weight.addWeight,
+  listWeight: weight.listWeight,
+  patchWeight: weight.patchWeight,
+  deleteWeight: weight.deleteWeight,
 
   // measurements
-  addMeasurement: (_data: MeasurementIn): Promise<MeasurementOut | null> =>
-    Promise.resolve(null),
-  listMeasurements: (): Promise<MeasurementOut[]> => Promise.resolve([]),
-  patchMeasurement: (_id: number, _data: MeasurementPatch): Promise<MeasurementOut | null> =>
-    Promise.resolve(null),
-  deleteMeasurement: (_id: number): Promise<null> => Promise.resolve(null),
+  addMeasurement: measurements.addMeasurement,
+  listMeasurements: measurements.listMeasurements,
+  patchMeasurement: measurements.patchMeasurement,
+  deleteMeasurement: measurements.deleteMeasurement,
 }
 
 export function todayIso(): string {

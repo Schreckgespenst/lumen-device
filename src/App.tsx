@@ -1,15 +1,31 @@
-import { Routes, Route, NavLink } from 'react-router-dom'
-import type { ReactNode } from 'react'
+import { useEffect, useState, type ReactNode } from 'react'
+import { Routes, Route, Navigate, Link, NavLink, useLocation } from 'react-router-dom'
 import Dashboard from './pages/Dashboard'
 import Chat from './pages/Chat'
 import Tracker from './pages/Tracker'
 import Setup from './pages/Setup'
+import { api } from './services'
 
 export default function App() {
+  const [loading, setLoading] = useState(true)
+  const [hasProfile, setHasProfile] = useState(false)
+  const location = useLocation()
+
+  useEffect(() => {
+    api.getProfile()
+      .then((p) => setHasProfile(Boolean(p?.user)))
+      .catch(() => setHasProfile(false))
+      .finally(() => setLoading(false))
+  }, [location.pathname])
+
+  if (loading) {
+    return <div className="p-8 text-subtle">Loading…</div>
+  }
+
   return (
     <div className="min-h-full">
       <header className="px-6 py-4 border-b border-muted flex items-center justify-between">
-        <span className="text-2xl font-semibold tracking-tight">Lumen</span>
+        <Link to="/" className="text-2xl font-semibold tracking-tight">Lumen</Link>
         <nav className="flex gap-5 text-sm">
           <NavItem to="/" end>Dashboard</NavItem>
           <NavItem to="/chat">Chat</NavItem>
@@ -19,10 +35,19 @@ export default function App() {
       </header>
       <main className="px-6 py-6 max-w-5xl mx-auto">
         <Routes>
-          <Route path="/" element={<Dashboard />} />
-          <Route path="/chat" element={<Chat />} />
-          <Route path="/tracker" element={<Tracker />} />
           <Route path="/setup" element={<Setup />} />
+          <Route
+            path="/"
+            element={hasProfile ? <Dashboard /> : <Navigate to="/setup" replace />}
+          />
+          <Route
+            path="/tracker"
+            element={hasProfile ? <Tracker /> : <Navigate to="/setup" replace />}
+          />
+          <Route
+            path="/chat"
+            element={hasProfile ? <Chat /> : <Navigate to="/setup" replace />}
+          />
         </Routes>
       </main>
     </div>
