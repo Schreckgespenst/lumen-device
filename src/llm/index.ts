@@ -28,6 +28,7 @@ export interface ChatJsonReply {
   reply_markdown: string
   food_entries: Array<Record<string, unknown>>
   follow_up_options: string[]
+  weight_kg?: number | string
   [key: string]: unknown
 }
 

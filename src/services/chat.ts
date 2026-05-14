@@ -6,6 +6,7 @@
 import { getDb, persist } from './db'
 import { getProfile, applyDynamicPatch } from './profile'
 import { addFood } from './food'
+import { addWeight } from './weight'
 import {
   chatJson,
   chatPlain,
@@ -24,7 +25,15 @@ const HISTORY_TURNS = 6
 const RECENT_WEIGHT_LIMIT = 7
 
 function todayIso(): string {
-  return new Date().toISOString().slice(0, 10)
+  // Local-date YYYY-MM-DD. Must match services/index.ts:todayIso so food
+  // logged via chat lands on the same date the Tracker/Dashboard query for.
+  // The naive toISOString().slice(0,10) is UTC and rolls over the date
+  // boundary for anyone east of London after their local midnight.
+  const d = new Date()
+  const yyyy = d.getFullYear()
+  const mm = String(d.getMonth() + 1).padStart(2, '0')
+  const dd = String(d.getDate()).padStart(2, '0')
+  return `${yyyy}-${mm}-${dd}`
 }
 
 function rowToMessage(row: Record<string, unknown>): ChatMessageOut {
@@ -158,6 +167,19 @@ export async function sendChat(message: string, image_b64: string | null = null)
   const replyMd = parsed.reply_markdown || ''
   const followUps = parsed.follow_up_options || []
   const added = await persistFoodEntries(today, parsed.food_entries || [])
+
+  // Optional weight_kg field in the JSON contract — populated only when the
+  // user reports a current weight. Coerce defensively in case the LLM emits
+  // a stringified number.
+  const wRaw = parsed.weight_kg
+  const w = typeof wRaw === 'number' ? wRaw : typeof wRaw === 'string' ? Number(wRaw) : NaN
+  if (Number.isFinite(w) && w > 0) {
+    try {
+      await addWeight({ weight_kg: w })
+    } catch {
+      // Non-fatal — don't block the chat reply on a weight insert failure.
+    }
+  }
 
   await insertMessage('assistant', replyMd)
   await persist()

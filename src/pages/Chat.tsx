@@ -9,6 +9,8 @@ interface ChatMessage {
   created_at?: string
 }
 
+const TEXTAREA_MAX_PX = 160
+
 export default function Chat() {
   const [messages, setMessages] = useState<ChatMessage[]>([])
   const [draft, setDraft] = useState('')
@@ -17,6 +19,7 @@ export default function Chat() {
   const [followUps, setFollowUps] = useState<string[]>([])
   const [error, setError] = useState<string | null>(null)
   const endRef = useRef<HTMLDivElement | null>(null)
+  const textareaRef = useRef<HTMLTextAreaElement | null>(null)
 
   useEffect(() => {
     api.chatHistory().then((rows) => setMessages(rows as ChatMessage[])).catch(() => {})
@@ -25,6 +28,13 @@ export default function Chat() {
   useEffect(() => {
     endRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages])
+
+  useEffect(() => {
+    const el = textareaRef.current
+    if (!el) return
+    el.style.height = '0px'
+    el.style.height = Math.min(el.scrollHeight, TEXTAREA_MAX_PX) + 'px'
+  }, [draft])
 
   const send = async (text?: string) => {
     const content = (text ?? draft).trim()
@@ -71,7 +81,7 @@ export default function Chat() {
   }
 
   return (
-    <div className="flex flex-col h-[calc(100vh-140px)]">
+    <div className="flex flex-col h-[calc(100dvh-180px-env(safe-area-inset-top)-env(safe-area-inset-bottom))] min-h-[60vh]">
       <div className="flex-1 overflow-y-auto space-y-3 pr-1">
         {messages.length === 0 && (
           <div className="text-subtle text-sm">
@@ -117,12 +127,14 @@ export default function Chat() {
           <input type="file" accept="image/*" className="hidden" onChange={onImage} />
         </label>
         <textarea
+          ref={textareaRef}
           rows={1}
           value={draft}
           onChange={(e) => setDraft(e.target.value)}
           placeholder={sending ? 'Thinking…' : 'Tell Lumen what you ate, or ask a question.'}
           onKeyDown={onKeyDown}
-          className="flex-1 bg-muted rounded-lg px-3 py-2 resize-none focus:ring-2 focus:ring-accent outline-none"
+          className="flex-1 bg-muted rounded-lg px-3 py-2 resize-none overflow-y-auto focus:ring-2 focus:ring-accent outline-none leading-5"
+          style={{ maxHeight: TEXTAREA_MAX_PX }}
         />
         <button
           type="submit"

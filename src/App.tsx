@@ -24,16 +24,16 @@ export default function App() {
 
   return (
     <div className="min-h-full">
-      <header className="px-6 py-4 border-b border-muted flex items-center justify-between">
+      <header className="border-b border-muted px-6 pt-[calc(env(safe-area-inset-top)+1rem)] pb-3 sm:pb-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <Link to="/" className="text-2xl font-semibold tracking-tight">Lumen</Link>
-        <nav className="flex gap-5 text-sm">
+        <nav className="flex gap-4 sm:gap-5 text-sm">
           <NavItem to="/" end>Dashboard</NavItem>
           <NavItem to="/chat">Chat</NavItem>
           <NavItem to="/tracker">Tracker</NavItem>
           <NavItem to="/setup">Settings</NavItem>
         </nav>
       </header>
-      <main className="px-6 py-6 max-w-5xl mx-auto">
+      <main className="px-6 pt-6 pb-[calc(env(safe-area-inset-bottom)+1.5rem)] max-w-5xl mx-auto">
         <Routes>
           <Route path="/setup" element={<Setup />} />
           <Route

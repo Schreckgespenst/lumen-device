@@ -32,8 +32,11 @@ The JSON has this shape:
       "food_name": "string", "kcal": number, "protein_g": number, "carbs_g": number,
       "fat_g": number, "fiber_g": number, "notes": "assumption note or empty"}
   ],
+  "weight_kg": <number, optional — include ONLY when the user is reporting their CURRENT weight in this message; omit otherwise>,
   "follow_up_options": ["string", ...]
 }
+
+When the user reports their current weight (e.g. "I weighed 98.8 kg today"), set "weight_kg" to that numeric value in kilograms and acknowledge the logged weight inside reply_markdown. Do NOT include "weight_kg" when the user merely references a past weight, asks a question, or talks about weight in the abstract.
 
 == WHEN intent IS calorie_log ==
 \`reply_markdown\` MUST follow this exact structure:
