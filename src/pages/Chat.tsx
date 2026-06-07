@@ -80,8 +80,31 @@ export default function Chat() {
     }
   }
 
+  const onClearChat = async () => {
+    if (sending) return
+    if (!window.confirm('Clear all chat history? Food and weight already logged stay in the Tracker.')) return
+    try {
+      await api.clearChat()
+      setMessages([])
+      setFollowUps([])
+      setError(null)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : String(err))
+    }
+  }
+
   return (
     <div className="flex flex-col h-[calc(100dvh-180px-env(safe-area-inset-top)-env(safe-area-inset-bottom))] min-h-[60vh]">
+      <div className="flex justify-end pb-2">
+        <button
+          type="button"
+          onClick={() => void onClearChat()}
+          disabled={messages.length === 0 || sending}
+          className="text-xs text-subtle hover:text-red-400 disabled:opacity-40 disabled:hover:text-subtle"
+        >
+          Clear chat
+        </button>
+      </div>
       <div className="flex-1 overflow-y-auto space-y-3 pr-1">
         {messages.length === 0 && (
           <div className="text-subtle text-sm">

@@ -10,17 +10,18 @@ no-hosting build.
 
 ## Status
 
-**Beta — v0.1.0.** All five build phases shipped; end-to-end tested in Chrome on
-`npm run dev` and on a physical Android device. Profile saves, food/weight/
-measurements persist across reloads, Chat hits Groq and writes parsed entries
-into the Tracker. See [`CHANGELOG.md`](./CHANGELOG.md) for the per-version cut
-list and [`docs/ARCHITECTURE.md`](./docs/ARCHITECTURE.md) for the design.
+**Beta — v0.1.1.** All five build phases shipped; end-to-end tested in Chrome on
+`npm run dev` and on a physical Android device over a week of real use. Profile
+saves, food/weight/measurements persist across reloads, Chat hits Groq and
+writes parsed entries into the Tracker without duplication. See
+[`CHANGELOG.md`](./CHANGELOG.md) for the per-version cut list and
+[`docs/ARCHITECTURE.md`](./docs/ARCHITECTURE.md) for the design.
 
-Latest debug APK is attached to the [v0.1.0 release](../../releases/tag/v0.1.0).
+Latest debug APK is attached to the [latest release](../../releases/latest).
 
 ## Install on Android
 
-1. Download `app-debug.apk` from the [v0.1.0 release](../../releases/tag/v0.1.0).
+1. Download `app-debug.apk` from the [latest release](../../releases/latest).
 2. Sideload — allow "install from unknown sources" for whatever browser or file
    manager you opened the APK with, then accept the prompt.
 3. Open the app, finish the Setup screen, paste a Groq API key under Settings

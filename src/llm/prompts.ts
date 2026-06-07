@@ -39,29 +39,31 @@ The JSON has this shape:
 When the user reports their current weight (e.g. "I weighed 98.8 kg today"), set "weight_kg" to that numeric value in kilograms and acknowledge the logged weight inside reply_markdown. Do NOT include "weight_kg" when the user merely references a past weight, asks a question, or talks about weight in the abstract.
 
 == WHEN intent IS calorie_log ==
-\`reply_markdown\` MUST follow this exact structure:
+\`reply_markdown\` MUST follow this exact structure, BUT every angle-bracket token below is a placeholder you MUST replace with the actual computed value before sending. Emitting literal text like "~<X> kcal" or "<consumed>g" in the visible reply is a critical bug.
 
-**Calorie Tracking: <Date>**
+**Calorie Tracking: REPLACE_WITH_TODAYS_DATE**
 
-**<Meal Name>: ~<total> kcal**
-- <Item>: <kcal> kcal (<brief assumption>)
+**REPLACE_WITH_MEAL_NAME: ~SUM_OF_KCAL_FOR_MEAL kcal**
+- ITEM_NAME: KCAL_VALUE kcal (brief assumption text)
 - ...
 
-**<Next Meal>: ~<total> kcal**
+**REPLACE_WITH_NEXT_MEAL: ~SUM_OF_KCAL_FOR_MEAL kcal**
 - ...
 
 ---
 **Daily Summary**
-- Total Consumed: ~<X> kcal
-- Remaining Budget: <Y> kcal
-- Estimated Protein: ~<Z>g
+- Total Consumed: ~SUM_OF_ALL_KCAL_TODAY kcal
+- Remaining Budget: USER_DAILY_GOAL_MINUS_TOTAL kcal
+- Estimated Protein: ~SUM_OF_ALL_PROTEIN_G g
 - Macros:
-  - Protein: <consumed>g / <goal>g
-  - Carbohydrates: <consumed>g / <goal>g
-  - Fats: <consumed>g / <goal>g
-  - Fiber: <consumed>g / <goal>g
+  - Protein: SUM_PROTEIN_G g / USER_PROFILE_PROTEIN_GOAL g
+  - Carbohydrates: SUM_CARBS_G g / USER_PROFILE_CARBS_GOAL g
+  - Fats: SUM_FAT_G g / USER_PROFILE_FAT_GOAL g
+  - Fiber: SUM_FIBER_G g / USER_PROFILE_FIBER_GOAL g
 
-\`food_entries\` MUST contain one row per item the user logged so the backend can persist them.
+Every all-caps SNAKE_CASE token above is a value you must compute (sum the relevant columns from today's food log INCLUDING the new entries from this turn, then look up the goal from the user profile) and substitute as a plain integer. Do not emit angle brackets, square brackets, or the SNAKE_CASE tokens themselves.
+
+\`food_entries\` MUST contain rows ONLY for items the user mentioned in their MOST RECENT message. Items already present in "Today's Food Log So Far" are provided as context for your computation — they are ALREADY persisted and you MUST NOT re-emit them. Emitting a row for an item that is already in Today's Food Log So Far causes the Tracker to show it twice. If the user's current message has no new food items (e.g. they only ask for analysis), food_entries MUST be [].
 
 \`follow_up_options\` should include (only those that are relevant):
 - "Suggestions for Optimisation"

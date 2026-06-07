@@ -7,6 +7,39 @@ All notable changes to **lumen-device** are recorded here. Format loosely follow
 The hosted sibling project [`Lumen`](https://github.com/Schreckgespenst/Lumen) has its own
 changelog; entries here cover only what differs in the no-hosting build.
 
+## [0.1.1] — 2026-06-07
+
+Bug fixes from a week of real-device usage. No new features; no schema change.
+
+### Fixed
+- **Duplicate food entries on every new meal.** When a user logged lunch after
+  already logging breakfast, the LLM was re-emitting the breakfast rows in
+  `food_entries`, so the Tracker showed each earlier meal twice and again the
+  next time. The system prompt's `food_entries` clause was ambiguous between
+  "items from this message" and "all of today". Now tightened to "ONLY items
+  the user mentioned in their MOST RECENT message" with an explicit note that
+  items already present in `Today's Food Log So Far` must NOT be re-emitted.
+- **Literal placeholders in LLM replies** (`~<X> kcal`, `<consumed>g / <goal>g`).
+  The angle-bracket placeholders in the system prompt's `reply_markdown`
+  template were being echoed verbatim by weaker models. Replaced with
+  `SNAKE_CASE` substitution tokens (`SUM_OF_ALL_KCAL_TODAY`,
+  `USER_DAILY_GOAL_MINUS_TOTAL`, etc.) and an explicit imperative rule that
+  every such token must be replaced with the actual computed integer.
+
+### Added
+- **Clear chat button** in the Chat page. Wipes `chat_history` after a
+  confirmation prompt; food/weight already in the Tracker is untouched. The
+  underlying `api.clearChat()` already existed since Phase 3 — this just
+  exposes the affordance.
+
+### Notes
+- On-device LLM migration to Gemma 3n / LiteRT was scoped and declined in
+  this round (quality regression risk + ~3 GB model download + ~1–2 weeks of
+  plugin work). Groq stays the default. If chat reply quality is still
+  imperfect with `llama-3.1-8b-instant`, swapping the Settings card's model
+  to `llama-3.3-70b-versatile` (also free on Groq) is the cheapest quality
+  lever before any prompt or platform work.
+
 ## [0.1.0] — 2026-05-15
 
 First beta. Phases 1–5 complete: the app runs end-to-end on Android with no backend
