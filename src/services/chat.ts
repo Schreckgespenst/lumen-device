@@ -3,6 +3,8 @@
 // persists any food_entries the model returned, and kicks off the profile
 // learning side call in the background.
 
+import { Preferences } from '@capacitor/preferences'
+
 import { getDb, persist } from './db'
 import { getProfile, applyDynamicPatch } from './profile'
 import { addFood } from './food'
@@ -206,4 +208,72 @@ export async function clearChat(): Promise<null> {
   await db.run('DELETE FROM chat_history')
   await persist()
   return null
+}
+
+// --- Chat settings: daily auto-clear ----------------------------------------
+//
+// The user can opt into wiping chat_history on the first launch of each local
+// day. Two Preferences keys back the feature:
+//
+//   lumen.chat.auto_clear_daily  — "true" | "false"
+//   lumen.chat.last_clear_date   — YYYY-MM-DD local (last day a clear ran)
+//
+// Food and weight already persisted in the Tracker are NOT touched by the
+// auto-clear, only chat_history is.
+
+const CHAT_KEYS = {
+  autoClearDaily: 'lumen.chat.auto_clear_daily',
+  lastClearDate: 'lumen.chat.last_clear_date',
+}
+
+export interface ChatSettings {
+  autoClearDaily: boolean
+  lastClearDate: string
+}
+
+export async function getChatSettings(): Promise<ChatSettings> {
+  const [toggle, last] = await Promise.all([
+    Preferences.get({ key: CHAT_KEYS.autoClearDaily }),
+    Preferences.get({ key: CHAT_KEYS.lastClearDate }),
+  ])
+  return {
+    autoClearDaily: toggle.value === 'true',
+    lastClearDate: last.value ?? '',
+  }
+}
+
+export async function setChatSettings(patch: Partial<ChatSettings>): Promise<ChatSettings> {
+  const writes: Promise<unknown>[] = []
+  if (patch.autoClearDaily !== undefined) {
+    writes.push(
+      Preferences.set({
+        key: CHAT_KEYS.autoClearDaily,
+        value: patch.autoClearDaily ? 'true' : 'false',
+      }),
+    )
+    // Baseline last_clear_date to today when the toggle goes from any state to
+    // ON, so enabling the feature does not wipe the chat the user is looking
+    // at this moment — the next first-launch-of-a-day is when it triggers.
+    if (patch.autoClearDaily === true) {
+      writes.push(Preferences.set({ key: CHAT_KEYS.lastClearDate, value: todayIso() }))
+    }
+  }
+  if (patch.lastClearDate !== undefined) {
+    writes.push(Preferences.set({ key: CHAT_KEYS.lastClearDate, value: patch.lastClearDate }))
+  }
+  await Promise.all(writes)
+  return await getChatSettings()
+}
+
+// Called from main.tsx after initDb(). If the toggle is on and we have not
+// already cleared today (local date), wipe chat_history and stamp today.
+// Safe to call repeatedly; second call same day is a no-op.
+export async function runDailyClearIfDue(): Promise<boolean> {
+  const { autoClearDaily, lastClearDate } = await getChatSettings()
+  if (!autoClearDaily) return false
+  const today = todayIso()
+  if (lastClearDate === today) return false
+  await clearChat()
+  await Preferences.set({ key: CHAT_KEYS.lastClearDate, value: today })
+  return true
 }

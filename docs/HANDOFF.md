@@ -23,10 +23,12 @@ All five build phases are shipped. Two beta releases are out on GitHub. The app 
 | 5 | Android build — `cap add android`, `cap sync`, debug APK via `gradlew assembleDebug` | **Done** | `12ac2d5` (v0.1.0) |
 | – | Device QA after first day on device (date desync, weight from chat, safe-area insets, auto-grow textarea) | **Done** | `12ac2d5` (v0.1.0) |
 | – | Week-of-use bugs (duplicate food entries, literal placeholders in LLM replies, Clear chat button) | **Done** | v0.1.1 |
+| – | Daily auto-clear chat toggle (opt-in, fires on first launch of each local day) | **Done** | v0.1.2 |
+| 6 | Curated on-device food database (~1500-row SQLite seed + pre-fetch RAG into prompt) | **Planned** — see [`./PHASE6-FOOD-DB.md`](./PHASE6-FOOD-DB.md) | – |
 
 `npm run build` is green: 771 modules, ~754 KB / ~227 KB gzipped. Debug APK is ~25.8 MB. The bundle warning about >500 KB chunks is informational — recharts + sqlite glue dominate.
 
-**Next phase is not committed.** A Phase 6 of on-device LLM via MediaPipe + Gemma 3n was scoped in 2026-06-07 and declined; see [v0.1.1 changelog notes](../CHANGELOG.md) for the trade-offs that drove the decision. If the user revives that plan, the dispatch shape already has a `mediapipe` branch waiting in [`../src/llm/`](../src/llm).
+**Next phase is scoped, not started.** Phase 6 (curated on-device food database) was researched in 2026-06-11 via an 18-agent adversarial workflow and the plan lives at [`./PHASE6-FOOD-DB.md`](./PHASE6-FOOD-DB.md). Pick that up directly if you want to start the work. An earlier MediaPipe + Gemma 3n on-device-LLM plan was scoped in 2026-06-07 and declined; see [v0.1.1 changelog notes](../CHANGELOG.md) for the trade-offs.
 
 ## Architectural rules (locked in)
 

@@ -7,6 +7,30 @@ All notable changes to **lumen-device** are recorded here. Format loosely follow
 The hosted sibling project [`Lumen`](https://github.com/Schreckgespenst/Lumen) has its own
 changelog; entries here cover only what differs in the no-hosting build.
 
+## [0.1.2] — 2026-06-11
+
+Minor feature release. One opt-in toggle, one planning doc, no schema changes.
+
+### Added
+- **Daily auto-clear chat.** New toggle under Settings → "Chat settings" that
+  wipes `chat_history` on the first app open of each local day. Food, weight,
+  and measurements already in the Tracker are never touched. Enabling the
+  toggle does NOT immediately wipe the chat you are looking at — it baselines
+  the last-clear date to today, so the wipe fires on the next first-launch
+  of a new day. Implementation in
+  [`src/services/chat.ts`](src/services/chat.ts) (`getChatSettings`,
+  `setChatSettings`, `runDailyClearIfDue`) + a call after `initDb()` in
+  [`src/main.tsx`](src/main.tsx) + a new card in
+  [`src/pages/Setup.tsx`](src/pages/Setup.tsx).
+
+### Docs
+- **`docs/PHASE6-FOOD-DB.md`** — plan doc for grounding the LLM in a real
+  food database instead of guesses. Captures the output of the 2026-06-11
+  research workflow (curated 1500-row local SQLite seed + pre-fetch RAG into
+  the system prompt, refuting 6 alternative sources/patterns). Includes a
+  file-by-file implementation map, schema migration, JSON contract changes,
+  effort estimate (3–4 days), and open questions. Not implemented in v0.1.2.
+
 ## [0.1.1] — 2026-06-07
 
 Bug fixes from a week of real-device usage. No new features; no schema change.

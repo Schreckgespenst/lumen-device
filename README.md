@@ -10,7 +10,7 @@ no-hosting build.
 
 ## Status
 
-**Beta — v0.1.1.** All five build phases shipped; end-to-end tested in Chrome on
+**Beta — v0.1.2.** All five build phases shipped; end-to-end tested in Chrome on
 `npm run dev` and on a physical Android device over a week of real use. Profile
 saves, food/weight/measurements persist across reloads, Chat hits Groq and
 writes parsed entries into the Tracker without duplication. See

@@ -2,13 +2,19 @@ import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { HashRouter } from 'react-router-dom'
 import App from './App'
-import { initDb } from './services'
+import { initDb, api } from './services'
 import './index.css'
 
 const rootEl = document.getElementById('root')!
 
 initDb()
-  .then(() => {
+  .then(async () => {
+    // Daily auto-clear chat (opt-in). Best-effort — never block app start.
+    try {
+      await api.runDailyClearIfDue()
+    } catch (e) {
+      console.warn('runDailyClearIfDue failed', e)
+    }
     createRoot(rootEl).render(
       <StrictMode>
         <HashRouter>

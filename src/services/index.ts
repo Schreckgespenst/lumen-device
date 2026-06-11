@@ -20,6 +20,9 @@ export const api = {
   sendChat: chat.sendChat,
   chatHistory: chat.chatHistory,
   clearChat: chat.clearChat,
+  getChatSettings: chat.getChatSettings,
+  setChatSettings: chat.setChatSettings,
+  runDailyClearIfDue: chat.runDailyClearIfDue,
 
   // food
   addFood: food.addFood,

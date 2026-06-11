@@ -165,6 +165,73 @@ export default function Setup() {
       </form>
 
       <LlmSettingsCard />
+      <ChatSettingsCard />
+    </div>
+  )
+}
+
+function ChatSettingsCard() {
+  const [autoClearDaily, setAutoClearDaily] = useState(false)
+  const [lastClearDate, setLastClearDate] = useState('')
+  const [saving, setSaving] = useState(false)
+  const [status, setStatus] = useState<string | null>(null)
+
+  useEffect(() => {
+    api.getChatSettings().then((s) => {
+      setAutoClearDaily(s.autoClearDaily)
+      setLastClearDate(s.lastClearDate)
+    }).catch(() => {})
+  }, [])
+
+  const onToggle = async (next: boolean) => {
+    setSaving(true)
+    setStatus(null)
+    try {
+      const s = await api.setChatSettings({ autoClearDaily: next })
+      setAutoClearDaily(s.autoClearDaily)
+      setLastClearDate(s.lastClearDate)
+      setStatus(
+        next
+          ? 'Daily auto-clear enabled. Chat will wipe on the first launch of each new day.'
+          : 'Daily auto-clear disabled.',
+      )
+    } catch (err) {
+      setStatus(err instanceof Error ? err.message : String(err))
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  return (
+    <div className="space-y-4 bg-card rounded-2xl p-6 border border-muted">
+      <div>
+        <h2 className="text-xl font-semibold">Chat settings</h2>
+        <p className="text-subtle text-sm mt-1">
+          Optional daily reset for the chat panel. Food, weight, and measurements
+          already in the Tracker are never touched.
+        </p>
+      </div>
+
+      <label className="flex items-center justify-between gap-4 cursor-pointer select-none">
+        <div className="flex-1">
+          <div className="text-sm">Auto-clear chat every day</div>
+          <div className="text-subtle text-xs mt-0.5">
+            Wipes chat history on the first app open each calendar day.
+            {lastClearDate && (
+              <> Last clear: <span className="tnum">{lastClearDate}</span>.</>
+            )}
+          </div>
+        </div>
+        <input
+          type="checkbox"
+          checked={autoClearDaily}
+          disabled={saving}
+          onChange={(e) => void onToggle(e.target.checked)}
+          className="h-5 w-5 accent-accent shrink-0"
+        />
+      </label>
+
+      {status && <div className="text-sm text-subtle">{status}</div>}
     </div>
   )
 }
